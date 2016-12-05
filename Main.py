@@ -1,11 +1,11 @@
 ##
-## GroupMeCli - An open source command line client for the GroupMe messaging app. 
-## 
+## GroupMeCli - An open source command line client for the GroupMe messaging app.
+##
 ## Created by: Grant McGovern
 ## Date: 31 July 2014
-## Contact: github.com/g12mcgov 
+## Contact: github.com/g12mcgov
 ##
-## Purpose: To provide a command line tool to be used to send/recieve/favorite/and view 
+## Purpose: To provide a command line tool to be used to send/recieve/favorite/and view
 ## GroupMe chats/groups. For those of us who are always in front of a shell and want to stay
 ## in the loop... [see Github page for more info]
 ##
@@ -33,7 +33,7 @@ def main():
 	print "The groups you belong to are listed below:\n"
 	users = aggregateFetch()
 	displayOptions()
-	
+
 	while True:
 		response = raw_input('> ')
 
@@ -47,7 +47,7 @@ def main():
 		elif response == '3':
 			print "\nEnter your groupId"
 			print "Don't know it? Type %s\n" % colored("find", 'green')
-			
+
 			while True:
 				user_input = raw_input('> ')
 				user_input = user_input.strip()
@@ -60,6 +60,8 @@ def main():
 				elif user_input == 'menu':
 					displayOptions()
 					break
+				elif user_input == 'exit':
+					return
 				else:
 					while True:
 						groupID = user_input
@@ -86,7 +88,7 @@ def main():
 						except:
 							print "Invalid input."
 					if response == 'no':
-						break		
+						break
 		elif response == "exit":
 			return
 		else:
@@ -119,7 +121,7 @@ def messagePrompt(groupID):
 	elif response:
 		return response
 	else:
-		print "Not valid input"	
+		print "Not valid input"
 
 
 def aggregateFetch():
@@ -149,7 +151,7 @@ def getGroups(base_url):
 	print req.url
 
 	data = json.loads(req.content)
-	
+
 	## For debug purposes, so we can view what we're getting (prettily)
 	json_response = json.dumps(data, ensure_ascii=False, encoding="utf-8", separators=(',', ':'), indent=4)
 
@@ -159,7 +161,7 @@ def getGroups(base_url):
 		if errors:
 			for error in errors:
 				if "UnauthorizedError" in error:
-					print colored("Please check you have loaded your Developer key.", 'red') 
+					print colored("Please check you have loaded your Developer key.", 'red')
 	except:
 		pass
 
@@ -171,7 +173,7 @@ def getGroups(base_url):
 	groupids = [group_id["group_id"] for group_id in responses]
 	creatorUserIds = [creator_user_id["creator_user_id"] for creator_user_id in responses]
 	member_blocks = [member["members"] for member in responses]
-	
+
 	userIds = []
 	nicknames = []
 	imageUrls = []
@@ -189,7 +191,7 @@ def getGroups(base_url):
 	for name, message_count, creator_user_id, group_id, id_, user in zip(names, messageCounts, ids, groupids, creatorUserIds, Users):
 		Groups.append(Group(name, message_count, creator_user_id, group_id, id_, user))
 
-	return Groups 
+	return Groups
 
 def showGroups(group):
 	name = group.showName()
@@ -197,7 +199,7 @@ def showGroups(group):
 	creator_user_id = group.showCreatorUserId()
 	group_id = group.showGroupId()
 	id_ = group.showId()
-	
+
 	dictCollection = group.showMembers()
 
 	messageCount = colored("Message Count:", 'yellow')
@@ -208,7 +210,7 @@ def showGroups(group):
 	users = fetchUsers(dictCollection)
 
 	title = "%s | %s %s | %s %s | %s %s | %s %s |" % (colored(name, 'green'), messageCount, message_count, creator, creator_user_id, groupId, group_id, ID, id_)
-	
+
 	table = PrettyTable([title, "User ID"])
 	table.align[title] = "l" ## Align title to the left
 	table.padding_width = 1
@@ -276,11 +278,11 @@ def viewMessages(url, groupID, users):
 			print "id: %s\n" % colored(messageDict['id'], 'cyan')
 
 def sendMessageToGroup(message, groupId):
-	url = base_url + '/groups/' + groupId + "/messages" 
+	url = base_url + '/groups/' + groupId + "/messages"
 
 	headers = {"Content-Type":"application/json"}
 	## GroupMe has a weird post API feature where you must include a "Source Guid"
-	## Unfortunately, they use this as a way to detect multiple messages from the same 
+	## Unfortunately, they use this as a way to detect multiple messages from the same
 	## source. If you send more than a couple messages within a short amount of time, it
 	## will temporarily lock you out. To counter this, we can generate a random GUID. Of
 	## course, the chance there is a collision still exists, but it is low considering our
@@ -293,20 +295,20 @@ def sendMessageToGroup(message, groupId):
 		body = data["response"]
 
 		## A simple way to verify if the message was actually sent
-		if body["message"]: 
+		if body["message"]:
 			print "Message sent."
-	except:	
+	except:
 		print "Failed to send."
 
 def favoriteMessage(groupID, messageId):
 	url = base_url + '/messages/' + groupID + '/' + messageId + '/like'
-	print url 
+	print url
 
 	headers = {"Content-Type":"application/json"}
 
 	response = json.loads(requests.post(url=url, headers=headers, params={'token':ACCESS_KEY}).content)
 
-	print response 
+	print response
 
 def unfavoriteMessage(groupID, messageId):
 	url = base_url + '/messages/' + groupID + '/' + messageId + '/unlike'
@@ -315,9 +317,9 @@ def unfavoriteMessage(groupID, messageId):
 
 	response = json.loads(requests.post(url=url, headers=headers, params={'token':ACCESS_KEY}).content)
 
-	print response 
+	print response
 
-				
+
 def getKey():
 	with open("key.csv", 'r') as keyfile:
 		keyreader = csv.reader(keyfile)
@@ -326,6 +328,3 @@ def getKey():
 
 if __name__ == "__main__":
 	main()
-	
-
-
