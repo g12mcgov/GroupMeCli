@@ -69,25 +69,28 @@ def main():
 						groupID = user_input
 						try:
 							viewMessages(base_url+'/groups/', groupID, users)
-							response = messagePrompt(groupID)
-							if response == None:
-								displayOptions()
-								break
-							elif response == 'like':
-								messageId = raw_input('Please enter messageID > ')
-								favoriteMessage(groupID, messageId)
-							elif response == 'unlike':
-								messageId = raw_input('Please enter messageID > ')
-								unfavoriteMessage(groupID, messageId)
-							elif response == 'back':
-								break ## Go back to menu level
-							elif response == 'exit':
-								return ## Exit out of entire program
-							elif response == 'refresh':
-								viewMessages(base_url+'groups/', groupID, users)
-							elif response:
-								sendMessageToGroup(response, groupID)
-						except:
+                                                except:
+                                                        print "Failed to load messages"
+                                                        break
+						response = messagePrompt(groupID)
+						if response == None:
+							displayOptions()
+							break
+						elif response == 'like':
+							messageId = raw_input('Please enter messageID > ')
+							favoriteMessage(groupID, messageId)
+						elif response == 'unlike':
+							messageId = raw_input('Please enter messageID > ')
+							unfavoriteMessage(groupID, messageId)
+						elif response == 'back':
+							break ## Go back to menu level
+						elif response == 'exit':
+							return ## Exit out of entire program
+						elif response == 'refresh':
+							viewMessages(base_url+'groups/', groupID, users)
+						elif response:
+							sendMessageToGroup(response, groupID)
+                                                else:
 							print "Invalid input."
 					if response == 'no':
 						break
