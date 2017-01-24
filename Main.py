@@ -91,6 +91,7 @@ def main():
 							messageId = raw_input('Please enter messageID > ')
 							unfavoriteMessage(groupID, messageId)
 						elif response == 'back':
+                                                        comp.clear_complete_list()
 							break ## Go back to menu level
 						elif response == 'exit':
 							return ## Exit out of entire program
