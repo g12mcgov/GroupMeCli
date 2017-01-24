@@ -36,7 +36,8 @@ def main():
 
 	while True:
 		response = raw_input('> ')
-
+                #remove ending whitespace
+                response = response.strip()
 		if response == 'help':
 			displayOptions()
 		elif response == '1':
