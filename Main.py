@@ -62,6 +62,8 @@ def main():
 					break
 				elif user_input == 'exit':
 					return
+                                elif user_input == 'back':
+                                        break
 				else:
 					while True:
 						groupID = user_input
