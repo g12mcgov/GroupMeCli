@@ -20,21 +20,13 @@ from Groups import *
 from random import randint
 from termcolor import colored
 from prettytable import PrettyTable
+import Completer
 import readline
 
-COMMANDS = ['extra', 'extension', 'stuff', 'errors',
-                        'email', 'foobar', 'foo']
-def complete(text, state):
-        for cmd in COMMANDS:
-                if cmd.startswith(text):
-                        if not state:
-                                return cmd
-                        else:
-                                state -= 1
-
-def set_complete():
-        readline.parse_and_bind("tab: complete")
-        readline.set_completer(complete)
+comp = Completer.Completer()
+print comp.complete_list
+readline.parse_and_bind("tab: complete")
+readline.set_completer(comp.complete)
 
 ## The core url of GroupMe's API
 base_url = "https://api.groupme.com/v3"
@@ -156,18 +148,16 @@ def aggregateFetch():
 
 def findGroups():
 	titles = []
-        global COMMANDS
-        COMMANDS = []
+        group_ids = []
 	Groups = getGroups(base_url+'/groups')
 	for group in Groups:
 		name = group.showName()
 		group_id = group.showGroupId()
-                COMMANDS.append(group_id)
-
+                group_ids.append(group_id)
 		groupId = colored("Group ID:", 'yellow')
 		title = "Name: %s | %s " % (colored(name, 'green'), group_id)
 		titles.append(title)
-        set_complete()
+        comp.set_complete_list(group_ids)
 	return titles
 
 def getGroups(base_url):
@@ -264,8 +254,7 @@ def lookupUser(users, userId):
 
 def viewMessages(url, groupID, users):
 	print "Loading messages..."
-        global COMMANDS
-        COMMANDS = []
+        message_ids = []
 	endpoint = url + groupID + '/messages'
         
 	#data = requests.get(url=endpoint, params={'token':ACCESS_KEY, 'limit':30})
@@ -292,7 +281,7 @@ def viewMessages(url, groupID, users):
 		message['text'] = text
 		message['favorite'] = [lookupUser(users, fav) for fav in favorite] ## List object
 		message['id'] = messageId
-                COMMANDS.append(messageId)
+                message_ids.append(messageId)
 		message['attachment'] = attachment
 		dictCollection.append(message)
 
@@ -303,6 +292,8 @@ def viewMessages(url, groupID, users):
 		else:
 			print "%s: %s" % (colored(messageDict['name'], 'yellow'), messageDict['text'])
 			print "id: %s\n" % colored(messageDict['id'], 'cyan')
+
+        comp.set_complete_list(message_ids)
 
 def sendMessageToGroup(message, groupId):
 	url = base_url + '/groups/' + groupId + "/messages"
