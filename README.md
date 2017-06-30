@@ -8,7 +8,7 @@ Description
 ==========
 This is a brief command client for GroupMe that allows (largely) the same features as the GroupMe app, except for preferences, etc... 
 
-I wrote this client because while at college, a lot of my friends and I stay in contact via GroupMe, and, being a computer science student, a lot of my time is spend in front of a shell. Now I can run this client on another console tab and stay in the loop.
+I wrote this client because while at college, a lot of my friends and I stay in contact via GroupMe, and, being a computer science student, a lot of my time is spent in front of a shell. Now I can run this client on another console tab and stay in the loop.
 
 I looked around for existing clients and found 2. One written in Haskell and the other in Javascript, neither of which I wanted. 
 
