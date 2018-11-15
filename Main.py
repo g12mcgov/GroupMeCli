@@ -20,6 +20,13 @@ from Groups import *
 from random import randint
 from termcolor import colored
 from prettytable import PrettyTable
+import Completer
+import readline
+
+comp = Completer.Completer()
+print comp.complete_list
+readline.parse_and_bind("tab: complete")
+readline.set_completer(comp.complete)
 
 ## The core url of GroupMe's API
 base_url = "https://api.groupme.com/v3"
@@ -36,7 +43,8 @@ def main():
 
 	while True:
 		response = raw_input('> ')
-
+                #remove ending whitespace
+                response = response.strip()
 		if response == 'help':
 			displayOptions()
 		elif response == '1':
@@ -62,30 +70,36 @@ def main():
 					break
 				elif user_input == 'exit':
 					return
+                                elif user_input == 'back':
+                                        break
 				else:
 					while True:
 						groupID = user_input
 						try:
 							viewMessages(base_url+'/groups/', groupID, users)
-							response = messagePrompt(groupID)
-							if response == None:
-								displayOptions()
-								break
-							elif response == 'like':
-								messageId = raw_input('Please enter messageID > ')
-								favoriteMessage(groupID, messageId)
-							elif response == 'unlike':
-								messageId = raw_input('Please enter messageID > ')
-								unfavoriteMessage(groupID, messageId)
-							elif response == 'back':
-								break ## Go back to menu level
-							elif response == 'exit':
-								return ## Exit out of entire program
-							elif response == 'refresh':
-								viewMessages(base_url+'groups/', groupID, users)
-							elif response:
-								sendMessageToGroup(response, groupID)
-						except:
+                                                except:
+                                                        print "Failed to load messages"
+                                                        break
+						response = messagePrompt(groupID)
+						if response == None:
+							displayOptions()
+							break
+						elif response == 'like':
+							messageId = raw_input('Please enter messageID > ')
+							favoriteMessage(groupID, messageId)
+						elif response == 'unlike':
+							messageId = raw_input('Please enter messageID > ')
+							unfavoriteMessage(groupID, messageId)
+						elif response == 'back':
+                                                        comp.clear_complete_list()
+							break ## Go back to menu level
+						elif response == 'exit':
+							return ## Exit out of entire program
+						elif response == 'refresh':
+							viewMessages(base_url+'groups/', groupID, users)
+						elif response:
+							sendMessageToGroup(response, groupID)
+                                                else:
 							print "Invalid input."
 					if response == 'no':
 						break
@@ -135,14 +149,16 @@ def aggregateFetch():
 
 def findGroups():
 	titles = []
+        group_ids = []
 	Groups = getGroups(base_url+'/groups')
 	for group in Groups:
 		name = group.showName()
 		group_id = group.showGroupId()
+                group_ids.append(group_id)
 		groupId = colored("Group ID:", 'yellow')
 		title = "Name: %s | %s " % (colored(name, 'green'), group_id)
 		titles.append(title)
-
+        comp.set_complete_list(group_ids)
 	return titles
 
 def getGroups(base_url):
@@ -239,9 +255,9 @@ def lookupUser(users, userId):
 
 def viewMessages(url, groupID, users):
 	print "Loading messages..."
-
+        message_ids = []
 	endpoint = url + groupID + '/messages'
-
+        
 	#data = requests.get(url=endpoint, params={'token':ACCESS_KEY, 'limit':30})
 
 	data = json.loads(requests.get(url=endpoint, params={'token':ACCESS_KEY, 'limit':30}).content)
@@ -266,6 +282,7 @@ def viewMessages(url, groupID, users):
 		message['text'] = text
 		message['favorite'] = [lookupUser(users, fav) for fav in favorite] ## List object
 		message['id'] = messageId
+                message_ids.append(messageId)
 		message['attachment'] = attachment
 		dictCollection.append(message)
 
@@ -276,6 +293,8 @@ def viewMessages(url, groupID, users):
 		else:
 			print "%s: %s" % (colored(messageDict['name'], 'yellow'), messageDict['text'])
 			print "id: %s\n" % colored(messageDict['id'], 'cyan')
+
+        comp.set_complete_list(message_ids)
 
 def sendMessageToGroup(message, groupId):
 	url = base_url + '/groups/' + groupId + "/messages"
